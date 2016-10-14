@@ -1,3 +1,43 @@
+/******************************************************************************
+ * Author(s):
+ *   Mark Giles
+ *   Ryan Fleming
+ * File Name: project1.c
+ * Date Created: 10/14/2016
+ * Last Modified: 10/14/2016
+ * Description:
+ *   This program is self-contained (no extended header files) and
+ *   provides a mechanism to compare various algorithms used to calculate the 
+ *   maximum sum of a subarray given an array of integers. Each algorithm takes
+ *   as a parameter an input array of positive and/or negative integers,
+ *   calculates the maximum sum of a subarray as well as tracks the starting
+ *   and ending index of the subarray.
+ *
+ * Input: 
+ *   The primary input for this program is a file containing square bracket
+ *   delimited arrays with comma delimited integer values. The values are
+ *   parsed through reading the file, parsing the integers, placing them into
+ *   an array, and providing the array to each of the four algorithms for
+ *   processing. Each of the four algorithms are described in greater detail
+ *   in their corresponding function descriptions. Detailed function input is
+ *   located in the input section of each function.
+ *
+ * Output:
+ *   All output for this program is directed to a file in the current working
+ *   directory called MSS_Results.txt. Detailed function output is located in
+ *   the output section of each function.
+ *
+ * References:
+ *   Kadane's Algorithm - 
+ *     I researched methods for providing algorithm 4, depicted below in the
+ *     function called:
+ *       mssLinearTime(FILE * outputFile, int inputArray[512], int inputCount)
+ *     Various results were found surrounding this popular program, and I used
+ *     elements learned from the following two web sites to create the function
+ *       - https://en.wikipedia.org/wiki/Maximum_subarray_problem
+ *       - http://stackoverflow.com/questions/7943903/maximum-subarray-of-an-array-with-integers
+ *****************************************************************************/
+
 #include <stdio.h>
 #include <string.h>
 
@@ -26,13 +66,13 @@ void writeArray(FILE * outputFile, int array[512], int arrayCount) {
  *
  *****************************************************************************/
 void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
-	int maxSubarray[inputCount],	// subarray with maximum sum
-        maxSum = inputArray[0],		// sum of max subarray values
-        tmpSum = -1,				// used to hold temporary sum values
-		startIndex = -1,			// start index of best subarray
-        endIndex = -1,				// end index of best subarray
-        i = 0,						// loop iteration
-        j = 0;						// loop iteration
+	int i = 0,                      // loop iteration
+        j = 0,                      // loop iteration
+        maxSubarray[inputCount],    // subarray with maximum sum
+        maxSum = inputArray[0],     // sum of max subarray values
+        tmpSum = -1,                // used to hold temporary sum values
+		startIndex = -1,            // start index of best subarray
+        endIndex = -1;              // end index of best subarray
 
 	maxSum = inputArray[0];
 	for (i = 0; i < inputCount; i++) {
@@ -90,9 +130,40 @@ void mssDivideAndConquer(FILE * outputFile,
  *
  *****************************************************************************/
 void mssLinearTime(FILE * outputFile, int inputArray[512], int inputCount) {
+	int i = 0,                    // loop iteration
+        maxSoFar = 0,             // max tracking at each iteration
+        maxHere = 0,              // max at current iteration of loop
+        currentValue = 0,         // calculates value of current iteration
+        maxBeginning = 0,         // max at beginning of iteration
+        bestStartIndexSoFar = 0,  // start index of current max subarray
+        bestEndIndexSoFar = 0,    // end index of current max subarray
+        bestStartIndexHere = 0;   // current start index for max subarray
+
+    for (i = 0; i < inputCount; i++) {
+        currentValue = maxHere + inputArray[i];
+        if (currentValue > 0) {
+            if (maxHere == 0) {
+                bestStartIndexHere = i;
+            }
+            maxHere = currentValue;
+		} else {
+            maxHere = 0;
+        }
+
+        if (maxHere > maxSoFar) {
+            maxSoFar = maxHere;
+            bestEndIndexSoFar = i;
+            bestStartIndexSoFar = bestStartIndexHere;
+		}
+    }
+
 	fprintf(outputFile, "\nALGORITHM 4: MSS LINEAR TIME\n");
-	fprintf(outputFile, "Max Sum: \n");
+	fprintf(outputFile, "Max Sum: %i\n", maxSoFar);
 	fprintf(outputFile, "Output Array: \n");	
+	for (i = bestStartIndexSoFar; i <= bestEndIndexSoFar; i++) {
+		fprintf(outputFile, "%i ", inputArray[i]);
+	}
+	fprintf(outputFile, "\n");
 }
 
 int main() {
