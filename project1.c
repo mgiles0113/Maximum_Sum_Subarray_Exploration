@@ -11,17 +11,16 @@
  *   maximum sum of a subarray given an array of integers. Each algorithm takes
  *   as a parameter an input array of positive and/or negative integers,
  *   calculates the maximum sum of a subarray as well as tracks the starting
- *   and ending index of the subarray.
+ *   and ending index of the subarray. Each of the four algorithms are
+ *   described in greater detail in their corresponding function descriptions.
+ *   Detailed function input is located in the input section of each function.
  *
  * Input: 
  *   The primary input for this program is a file containing square bracket
  *   delimited arrays with comma delimited integer values. The values are
  *   parsed through reading the file, parsing the integers, placing them into
  *   an array, and providing the array to each of the four algorithms for
- *   processing. Each of the four algorithms are described in greater detail
- *   in their corresponding function descriptions. Detailed function input is
- *   located in the input section of each function.
- *
+ *   processing.  *
  * Output:
  *   All output for this program is directed to a file in the current working
  *   directory called MSS_Results.txt. Detailed function output is located in
@@ -43,58 +42,87 @@
 
 /******************************************************************************
  * Function Name: writeArray
- * Parameters:
- *     - outputFile: file to write array
- *     - array: values to be written
- *     - arrayCount: number of values in array 
+ * Description:
+ *   This function takes an array of integers and writes the
+ *   array's contents to a specified output file.
+ * Input:
+ *   - outputFile: file to write array
+ *   - array: values to be written
+ *   - arrayCount: number of values in array
+ * Output: 
+ *   - Writes the contents of each value of the array to the specified
+ *     output file.
  *****************************************************************************/
 void writeArray(FILE * outputFile, int array[512], int arrayCount) {
-	int i = 0;			// loop iteration
-	/* 
+    int i = 0;    // loop iteration
+    /* 
      * read through each value of array and write to ouput file. Each value is
      * separated by white space and the array is terminated by newline
     */
-	for (i = 0; i < arrayCount; i++) {
-		fprintf(outputFile, "%i ", array[i]);
-	}
-	fprintf(outputFile, "\n");
+    for (i = 0; i < arrayCount; i++) {
+        fprintf(outputFile, "%i ", array[i]);
+    }
+    fprintf(outputFile, "\n");
 }
 
 /******************************************************************************
  * Function Name: mssEnumeration
- * Parameters:
- *
+ * Description: This function takes an array of positive and negative integers
+ *   and calculates the maximum sum of a subarray of the array. It then writes
+ *   the results to a specified output file. This function represents an
+ *   iterative 
+ * Input:
+ *   - outputFile: file to write the results of the function
+ *   - inputArray: array of integers to be used to calculate maximum sum
+ *       and indices for the maximum subarray.
+ *   - inputCount: number of actual values in array for ease of iteration.
+ * Output:
+ *   All output is directed to the output file specified. The content is the
+ *   value of the maximum sum as well as the array contents of the input
+ *   array's maximum sum subarray.
  *****************************************************************************/
 void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
-	int i = 0,                      // loop iteration
+    int i = 0,                      // loop iteration
         j = 0,                      // loop iteration
         maxSubarray[inputCount],    // subarray with maximum sum
         maxSum = inputArray[0],     // sum of max subarray values
         tmpSum = -1,                // used to hold temporary sum values
-		startIndex = -1,            // start index of best subarray
+        startIndex = -1,            // start index of best subarray
         endIndex = -1;              // end index of best subarray
 
-	maxSum = inputArray[0];
-	for (i = 0; i < inputCount; i++) {
-		tmpSum = inputArray[i];
-		for (j = i + 1; j < inputCount; j++) {
-			tmpSum = tmpSum + inputArray[j];
-			if (tmpSum > maxSum) {
-				maxSum = tmpSum;
-				startIndex = i;
-				endIndex = j;
-			}
-		}
-	}
+    maxSum = inputArray[0];         // base case of the initial sum
 
-	fprintf(outputFile, "\nALGORITHM 1: MSS ENUMERATION\n");
-	fprintf(outputFile, "Max Sum: %i\n", maxSum);
-	fprintf(outputFile, "Output Array: \n");
-	for (i = startIndex; i <= endIndex; i++) {
-		fprintf(outputFile, "%i ", inputArray[i]);
-	}
-	fprintf(outputFile, "\n");
+    /*
+     * loop through each element in the array, comparing the values at i and
+     * j, tracking the maximum sum until the end of the array.
+    */
+    for (i = 0; i < inputCount; i++) {
+        // initial value for each iteration is the value at i
+        tmpSum = inputArray[i];
+        // loop until the end of available values
+        for (j = i + 1; j < inputCount; j++) {
+            // add to temporary sum the value at j
+            tmpSum = tmpSum + inputArray[j];
+            // store new max sum if the temp value is larger
+            if (tmpSum > maxSum) {
+                maxSum = tmpSum;
+                startIndex = i;
+                endIndex = j;
+            }
+        }
+    }
 
+    /* 
+     * print the name of the algorithm/function, maximum sum, and the contents
+     * of the maximum sum subarray
+    */
+    fprintf(outputFile, "\nALGORITHM 1: MSS ENUMERATION\n");
+    fprintf(outputFile, "Max Sum: %i\n", maxSum);
+    fprintf(outputFile, "Output Array: \n");
+    for (i = startIndex; i <= endIndex; i++) {
+        fprintf(outputFile, "%i ", inputArray[i]);
+    }
+    fprintf(outputFile, "\n");
 }
 
 /******************************************************************************
