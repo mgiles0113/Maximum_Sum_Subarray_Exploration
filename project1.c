@@ -26,9 +26,35 @@ void writeArray(FILE * outputFile, int array[512], int arrayCount) {
  *
  *****************************************************************************/
 void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
+	int maxSubarray[inputCount],	// subarray with maximum sum
+        maxSum = inputArray[0],		// sum of max subarray values
+        tmpSum = -1,				// used to hold temporary sum values
+		startIndex = -1,			// start index of best subarray
+        endIndex = -1,				// end index of best subarray
+        i = 0,						// loop iteration
+        j = 0;						// loop iteration
+
+	maxSum = inputArray[0];
+	for (i = 0; i < inputCount; i++) {
+		tmpSum = inputArray[i];
+		for (j = i + 1; j < inputCount; j++) {
+			tmpSum = tmpSum + inputArray[j];
+			if (tmpSum > maxSum) {
+				maxSum = tmpSum;
+				startIndex = i;
+				endIndex = j;
+			}
+		}
+	}
+
 	fprintf(outputFile, "\nALGORITHM 1: MSS ENUMERATION\n");
-	fprintf(outputFile, "Max Sum: \n");
+	fprintf(outputFile, "Max Sum: %i\n", maxSum);
 	fprintf(outputFile, "Output Array: \n");
+	for (i = startIndex; i <= endIndex; i++) {
+		fprintf(outputFile, "%i ", inputArray[i]);
+	}
+	fprintf(outputFile, "\n");
+
 }
 
 /******************************************************************************
