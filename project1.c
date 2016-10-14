@@ -87,8 +87,8 @@ void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
         maxSubarray[inputCount],    // subarray with maximum sum
         maxSum = inputArray[0],     // sum of max subarray values
         tmpSum = -1,                // used to hold temporary sum values
-        startIndex = -1,            // start index of best subarray
-        endIndex = -1;              // end index of best subarray
+        startIndex = 0,            // start index of best subarray
+        endIndex = 0;              // end index of best subarray
 
     maxSum = inputArray[0];         // base case of the initial sum
 
