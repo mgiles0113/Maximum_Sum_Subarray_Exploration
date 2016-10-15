@@ -1,3 +1,4 @@
+
 /******************************************************************************
  * Author(s):
  *   Mark Giles
@@ -39,6 +40,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
+#include <stdlib.h>
 
 /******************************************************************************
  * Function Name: writeArray
@@ -127,30 +130,151 @@ void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
 
 /******************************************************************************
  * Function Name: mssBetterEnumeration
- * Parameters:
- *
+ * Description: This function calculates the maximum subarray using enumeration. One number is added to the sum each time instead of recalculating the sum for every instance
+ * * Input:
+ *   - outputFile: file to write the results of the function
+ *   - inputArray: array of integers to be used to calculate maximum sum
+ *       and indices for the maximum subarray.
+ *   - inputCount: number of actual values in array for ease of iteration.
+ * Output:
+ *   All output is directed to the output file specified. The content is the
+ *   value of the maximum sum as well as the array contents of the input
+ *   array's maximum sum subarray.
  *****************************************************************************/
 void mssBetterEnumeration(FILE * outputFile,
                           int inputArray[512],
                           int inputCount) {
+	int maxSubsetSum, currentSum = 0;
+	int startSubset, stopSubset = 0;
+	int i, j;
+	for (i = 0; i < inputCount; i++){
+		currentSum = 0;
+		for (j = i; j < inputCount; j++){
+			currentSum += inputArray[j];
+			if (currentSum > maxSubsetSum)
+			{
+				maxSubsetSum = currentSum;
+				startSubset = i;
+				stopSubset = j;
+			}
+		}	
+	}
 	fprintf(outputFile, "\nALGORITHM 2: MSS BETTER ENUMERATION\n");
-	fprintf(outputFile, "Max Sum: \n");
+	fprintf(outputFile, "Max Sum: %i\n", maxSubsetSum);
 	fprintf(outputFile, "Output Array: \n");
+        for (i = startSubset; i <= stopSubset; i++) {
+             fprintf(outputFile, "%i ", inputArray[i]);
+        }
+        fprintf(outputFile, "\n");
 
 }
 
 /******************************************************************************
  * Function Name: mssDivideAndConquer
- * Parameters:
+ * Description: Finds maximum sum of subarray using divide and conquer. It does this by dividing the array in half and looking for the maximum subarray in the left subarray and the right subarray. If the maximum subarray contains the middle element then the maximum subarray is the maximum suffix subarray of the left plus the maximum prefix subarray of the right. This middle maximum is compared with bothe the maximum of the left and the right and the highest value is the maxium subarray.
+ * Input:
+ *   - outputFile: file to write the results of the function
+ *   - inputArray: array of integers to be used to calculate maximum sum
+ *       and indices for the maximum subarray.
+ *   - inputCount: number of actual values in array for ease of iteration.
+ * Output:
+ *   All output is directed to the output file specified. The content is the
+ *   value of the maximum sum as well as the array contents of the input
+ *   array's maximum sum subarray.
  *
  *****************************************************************************/
 void mssDivideAndConquer(FILE * outputFile,
                          int inputArray[512],
                          int inputCount) {
+	int i;
+	int highestSum = 0;
+	int currentLeft = 0;
+	int currentRight = 0; 
+	// run divide and conquer helper	
+	mssDivideAndConquerHelper(inputArray, 0, (inputCount - 1), &currentLeft, &currentRight, &highestSum);
+
 	fprintf(outputFile, "\nALGORITHM 3: MSS DIVIDE AND CONQUER\n");
-	fprintf(outputFile, "Max Sum: \n");
+	fprintf(outputFile, "Max Sum: %i\n", highestSum);
 	fprintf(outputFile, "Output Array: \n");
+        for (i = currentLeft; i <= currentRight; i++) {
+            fprintf(outputFile, "%i ", inputArray[i]);
+        }
+        fprintf(outputFile, "\n");
 }
+
+int mssDivideAndConquerHelper(int inputArray[], int left, int right, int *currentLeft, int *currentRight, int *highestSum){
+	//if only 1 element
+	if (left == right){
+		*currentLeft = left;
+		*currentRight = right;
+		*highestSum = inputArray[right];
+	}
+	else {
+		int middle = (left + right)/2;
+		//find maximum subarray of left subarray
+		int leftLow = 0;
+		int leftHigh = 0;
+		int leftSum = 0;
+		mssDivideAndConquerHelper(inputArray, left, middle, &leftLow, &leftHigh, &leftSum);
+		//find maximum subarray of right subarray
+		int rightLow = 0;
+		int rightHigh = 0;
+		int rightSum = 0;
+		mssDivideAndConquerHelper(inputArray, (middle + 1), right, &rightLow, &rightHigh, &rightSum);
+		//find maximum subarray that crosses both left and right subarrays 	
+		int crossLow = 0;
+		int crossHigh = 0;
+		int crossSum = 0;
+		mssCrossing(inputArray, left, middle, right, &crossLow, &crossHigh, &crossSum);
+		//if left side has greatest sum
+		if ((leftSum >= rightSum) && (leftSum >= crossSum)){
+			*currentLeft = leftLow;
+			*currentRight = leftHigh;
+			*highestSum = leftSum;
+		}
+		//if right side has greatest sum
+		else if ((rightSum >= leftSum) && (rightSum >= crossSum)) {	
+			*currentLeft = rightLow;
+			*currentRight = rightHigh;
+			*highestSum = rightSum;
+		}
+		//if greatest sum crosses left and right subarray
+		else if ((crossSum > leftSum) && (crossSum > rightSum)) {
+			*currentLeft = crossLow;
+			*currentRight = crossHigh;
+			*highestSum = crossSum;
+		}
+	}
+}
+
+int mssCrossing(int inputArray[], int left, int middle, int right, int *crossLow, int *crossHigh, int *crossSum){
+	int i;
+	//have to use INT_MIN due to negative integers in arrays
+	int leftSum, rightSum = INT_MIN;
+	int currentSum = 0;
+	//max subarray from mid to end of left
+	for (i = middle; i >= left; i--){
+		currentSum += inputArray[i];
+		if (currentSum > leftSum){
+			leftSum = currentSum;
+			*crossLow = i;
+		}
+	}
+	//max subarray from mid to end of right
+	currentSum = 0;
+	for (i = (middle + 1); i <= right; i++){
+		currentSum += inputArray[i];
+		if (currentSum > rightSum){
+			rightSum = currentSum;
+			*crossHigh = i;
+		}
+	}
+	//combine to make max sum
+	*crossSum = (leftSum + rightSum);
+}
+	
+	 
+		
 
 /******************************************************************************
  * Function Name: mssLinearTime
@@ -264,3 +388,4 @@ int main() {
 
 	return 0;
 }
+
