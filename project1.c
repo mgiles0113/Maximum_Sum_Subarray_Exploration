@@ -239,7 +239,7 @@ int mssDivideAndConquerHelper(int inputArray[], int left, int right, int *curren
 			*highestSum = rightSum;
 		}
 		//if greatest sum crosses left and right subarray
-		else if ((crossSum > leftSum) && (crossSum > rightSum)) {
+		else {
 			*currentLeft = crossLow;
 			*currentRight = crossHigh;
 			*highestSum = crossSum;
