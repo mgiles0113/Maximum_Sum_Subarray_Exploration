@@ -132,7 +132,6 @@ void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
     for (i = startIndex; i <= endIndex; i++) {
         fprintf(outputFile, "%i ", inputArray[i]);
     }
-    fprintf(outputFile, "\n");
 }
 
 /******************************************************************************
@@ -165,7 +164,6 @@ void mssBetterEnumeration(FILE * outputFile,
     for (i = startSubset; i <= stopSubset; i++) {
          fprintf(outputFile, "%i ", inputArray[i]);
     }
-    fprintf(outputFile, "\n");
 }
 
 /******************************************************************************
@@ -173,25 +171,40 @@ void mssBetterEnumeration(FILE * outputFile,
  * Parameters:
  *
  *****************************************************************************/
+int dacStartIndex = 0,
+	dacEndIndex = 0,
+	dacLargestSum = 0,
+	dacCrossingLeft = 0,
+	dacCrossingRight = 0;
 void mssDivideAndConquer(FILE * outputFile,
                          int inputArray[512],
                          int inputCount) {
-	int maxSum = -1;
-
+	//int maxSum = -1,
+	int	i = 0,
+		maxSum = 0;
+	dacStartIndex = 0;
+	dacEndIndex = inputCount - 1;
+	dacLargestSum = -1000;
 	maxSum = maxSubArraySum(inputArray, 0, inputCount - 1);
 
 	fprintf(outputFile, "\nALGORITHM 3: MSS DIVIDE AND CONQUER\n");
 	fprintf(outputFile, "Max Sum: %i\n", maxSum);
 	fprintf(outputFile, "Output Array: \n");
+	for (i = dacStartIndex; i <= dacEndIndex; i++) {
+		fprintf(outputFile, "%i ", inputArray[i]);
+	}
 }
 
 int maxCrossingSum(int arr[], int l, int m, int h) {
 	int sum = 0;
 	int left_sum = INT_MIN;
 	int i = 0;
+	dacCrossingLeft = m;
+	dacCrossingRight = m;
 	for (i = m; i >= l; i--) {
 		sum = sum + arr[i];
 		if (sum > left_sum) {
+			dacCrossingLeft = i;
 			left_sum = sum;
 		}
 	}
@@ -201,6 +214,7 @@ int maxCrossingSum(int arr[], int l, int m, int h) {
 	for (i = m + 1; i <= h; i++) {
 		sum = sum + arr[i];
 		if (sum > right_sum) {
+			dacCrossingRight = i;
 			right_sum = sum;
 		}
 	}
@@ -209,14 +223,40 @@ int maxCrossingSum(int arr[], int l, int m, int h) {
 }
 
 int maxSubArraySum(int arr[], int l, int h) {
+	
 	if (l == h) {
 		return arr[l];
 	}
 	int m = (l + h)/2;
+	int maxLeft = 0,
+		maxRight = 0,
+		maxCrossing = 0;
+	maxLeft = maxSubArraySum(arr, l, m);
+	maxRight = maxSubArraySum(arr, m + 1, h);
+	maxCrossing = maxCrossingSum(arr, l, m, h);
 
-	return max3(maxSubArraySum(arr, l, m),
-			   maxSubArraySum(arr, m + 1, h),
-			   maxCrossingSum(arr, l, m, h));
+	if (maxLeft > maxRight && maxLeft > maxCrossing) {
+		if (maxLeft > dacLargestSum) {
+			dacLargestSum = maxLeft;
+			dacStartIndex = l;
+			dacEndIndex = m;
+		}
+		return maxLeft;
+	} else if (maxRight > maxLeft && maxRight > maxCrossing) {
+		if (maxRight > dacLargestSum) {
+			dacLargestSum = maxRight;
+			dacStartIndex = m + 1;
+			dacEndIndex = h;
+		}
+		return maxRight;
+	} else {
+		if (maxCrossing > dacLargestSum) {
+			dacLargestSum = maxCrossing;
+			dacStartIndex = dacCrossingLeft;
+			dacEndIndex = dacCrossingRight;
+		}
+		return maxCrossing;
+	}
 }
 
 /******************************************************************************
