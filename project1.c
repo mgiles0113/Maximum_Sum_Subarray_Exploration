@@ -39,6 +39,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 /******************************************************************************
  * Function Name: writeArray
@@ -63,6 +64,15 @@ void writeArray(FILE * outputFile, int array[512], int arrayCount) {
         fprintf(outputFile, "%i ", array[i]);
     }
     fprintf(outputFile, "\n");
+}
+
+
+int max2(int a, int b) {
+	return (a > b)? a : b;
+}
+
+int max3(int a, int b, int c) {
+	return max2(max2(a, b), c);
 }
 
 /******************************************************************************
@@ -133,10 +143,29 @@ void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
 void mssBetterEnumeration(FILE * outputFile,
                           int inputArray[512],
                           int inputCount) {
-	fprintf(outputFile, "\nALGORITHM 2: MSS BETTER ENUMERATION\n");
-	fprintf(outputFile, "Max Sum: \n");
-	fprintf(outputFile, "Output Array: \n");
 
+	int maxSubsetSum, currentSum = 0;
+	int startSubset, stopSubset = 0;
+	int i, j;
+	for (i = 0; i < inputCount; i++){
+		currentSum = 0;
+		for (j = i; j < inputCount; j++){
+			currentSum += inputArray[j];
+			if (currentSum > maxSubsetSum)
+			{
+				maxSubsetSum = currentSum;
+				startSubset = i;
+				stopSubset = j;
+			}
+		}	
+	}
+	fprintf(outputFile, "\nALGORITHM 2: MSS BETTER ENUMERATION\n");
+	fprintf(outputFile, "Max Sum: %i\n", maxSubsetSum);
+	fprintf(outputFile, "Output Array: \n");
+    for (i = startSubset; i <= stopSubset; i++) {
+         fprintf(outputFile, "%i ", inputArray[i]);
+    }
+    fprintf(outputFile, "\n");
 }
 
 /******************************************************************************
@@ -147,9 +176,47 @@ void mssBetterEnumeration(FILE * outputFile,
 void mssDivideAndConquer(FILE * outputFile,
                          int inputArray[512],
                          int inputCount) {
+	int maxSum = -1;
+
+	maxSum = maxSubArraySum(inputArray, 0, inputCount - 1);
+
 	fprintf(outputFile, "\nALGORITHM 3: MSS DIVIDE AND CONQUER\n");
-	fprintf(outputFile, "Max Sum: \n");
+	fprintf(outputFile, "Max Sum: %i\n", maxSum);
 	fprintf(outputFile, "Output Array: \n");
+}
+
+int maxCrossingSum(int arr[], int l, int m, int h) {
+	int sum = 0;
+	int left_sum = INT_MIN;
+	int i = 0;
+	for (i = m; i >= l; i--) {
+		sum = sum + arr[i];
+		if (sum > left_sum) {
+			left_sum = sum;
+		}
+	}
+
+	sum = 0;
+	int right_sum = INT_MIN;
+	for (i = m + 1; i <= h; i++) {
+		sum = sum + arr[i];
+		if (sum > right_sum) {
+			right_sum = sum;
+		}
+	}
+
+	return left_sum + right_sum;
+}
+
+int maxSubArraySum(int arr[], int l, int h) {
+	if (l == h) {
+		return arr[l];
+	}
+	int m = (l + h)/2;
+
+	return max3(maxSubArraySum(arr, l, m),
+			   maxSubArraySum(arr, m + 1, h),
+			   maxCrossingSum(arr, l, m, h));
 }
 
 /******************************************************************************
@@ -206,7 +273,7 @@ int main() {
          stringValue[512];			// individual value from array as string
 
 	// files used for reading and writing
-	inputFile = fopen("MSS_TestProblems-1.txt", "r");
+	inputFile = fopen("MSS_Problems.txt", "r");
 	outputFile = fopen("MSS_Results.txt", "w");
 
 	/* 
