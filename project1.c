@@ -35,11 +35,19 @@
  *     elements learned from the following two web sites to create the function
  *       - https://en.wikipedia.org/wiki/Maximum_subarray_problem
  *       - http://stackoverflow.com/questions/7943903/maximum-subarray-of-an-array-with-integers
+ *   Divide and Conquer -
+ *     In addition to pseduocode from "Introduction to Algorithms" by Cormen,
+ *     Leiserson, Clifford, and Stein, I used the code on this post to serve
+ *       - http://www.geeksforgeeks.org/divide-and-conquer-maximum-sum-subarray
  *****************************************************************************/
 
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <time.h>
+
+
+const int testing = 1;
 
 /******************************************************************************
  * Function Name: writeArray
@@ -66,11 +74,20 @@ void writeArray(FILE * outputFile, int array[512], int arrayCount) {
     fprintf(outputFile, "\n");
 }
 
-
+/******************************************************************************
+ * Function Name: max2
+ * Description: This function takes two integers and returns the larger of the
+ * two.
+ *****************************************************************************/
 int max2(int a, int b) {
 	return (a > b)? a : b;
 }
 
+/******************************************************************************
+ * Function Name: max3
+ * Description: This function takes three integers and returns the larger of 
+ * the three.
+ *****************************************************************************/
 int max3(int a, int b, int c) {
 	return max2(max2(a, b), c);
 }
@@ -101,7 +118,7 @@ void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
         endIndex = 0;              // end index of best subarray
 
     maxSum = inputArray[0];         // base case of the initial sum
-
+	clock_t begin = clock();	
     /*
      * loop through each element in the array, comparing the values at i and
      * j, tracking the maximum sum until the end of the array.
@@ -121,6 +138,7 @@ void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
             }
         }
     }
+	clock_t end = clock();
 
     /* 
      * print the name of the algorithm/function, maximum sum, and the contents
@@ -128,11 +146,15 @@ void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
     */
     fprintf(outputFile, "\nALGORITHM 1: MSS ENUMERATION\n");
     fprintf(outputFile, "Max Sum: %i\n", maxSum);
-    fprintf(outputFile, "Output Array: \n");
-    for (i = startIndex; i <= endIndex; i++) {
-        fprintf(outputFile, "%i ", inputArray[i]);
-    }
-    fprintf(outputFile, "\n");
+	if (!testing) {
+		fprintf(outputFile, "\nINPUT ARRAY:\n");
+		writeArray(outputFile, inputArray, inputCount);
+	    fprintf(outputFile, "Output Array: \n");
+   		for (i = startIndex; i <= endIndex; i++) {
+       		fprintf(outputFile, "%i ", inputArray[i]);
+    	}
+	}
+	fprintf(outputFile, "Running Time: %lf\n", (double)(end - begin)/ CLOCKS_PER_SEC);
 }
 
 /******************************************************************************
@@ -147,6 +169,7 @@ void mssBetterEnumeration(FILE * outputFile,
 	int maxSubsetSum, currentSum = 0;
 	int startSubset, stopSubset = 0;
 	int i, j;
+	clock_t begin = clock();	
 	for (i = 0; i < inputCount; i++){
 		currentSum = 0;
 		for (j = i; j < inputCount; j++){
@@ -159,13 +182,18 @@ void mssBetterEnumeration(FILE * outputFile,
 			}
 		}	
 	}
+	clock_t end = clock();	
 	fprintf(outputFile, "\nALGORITHM 2: MSS BETTER ENUMERATION\n");
 	fprintf(outputFile, "Max Sum: %i\n", maxSubsetSum);
-	fprintf(outputFile, "Output Array: \n");
-    for (i = startSubset; i <= stopSubset; i++) {
-         fprintf(outputFile, "%i ", inputArray[i]);
-    }
-    fprintf(outputFile, "\n");
+	if (!testing) {
+		fprintf(outputFile, "\nINPUT ARRAY:\n");
+		writeArray(outputFile, inputArray, inputCount);
+		fprintf(outputFile, "Output Array: \n");
+    	for (i = startSubset; i <= stopSubset; i++) {
+        	 fprintf(outputFile, "%i ", inputArray[i]);
+    	}
+	}
+	fprintf(outputFile, "Running Time: %lf\n", (double)(end - begin)/ CLOCKS_PER_SEC);
 }
 
 /******************************************************************************
@@ -177,12 +205,18 @@ void mssDivideAndConquer(FILE * outputFile,
                          int inputArray[512],
                          int inputCount) {
 	int maxSum = -1;
-
+	clock_t begin = clock();
 	maxSum = maxSubArraySum(inputArray, 0, inputCount - 1);
+	clock_t end = clock();
 
 	fprintf(outputFile, "\nALGORITHM 3: MSS DIVIDE AND CONQUER\n");
 	fprintf(outputFile, "Max Sum: %i\n", maxSum);
-	fprintf(outputFile, "Output Array: \n");
+	if (!testing) {
+		fprintf(outputFile, "\nINPUT ARRAY:\n");
+		writeArray(outputFile, inputArray, inputCount);
+		fprintf(outputFile, "Output Array: \n");
+	}
+	fprintf(outputFile, "Running Time: %lf\n", (double)(end - begin)/ CLOCKS_PER_SEC);
 }
 
 int maxCrossingSum(int arr[], int l, int m, int h) {
@@ -233,7 +267,7 @@ void mssLinearTime(FILE * outputFile, int inputArray[512], int inputCount) {
         bestStartIndexSoFar = 0,  // start index of current max subarray
         bestEndIndexSoFar = 0,    // end index of current max subarray
         bestStartIndexHere = 0;   // current start index for max subarray
-
+	clock_t begin = clock();
     for (i = 0; i < inputCount; i++) {
         currentValue = maxHere + inputArray[i];
         if (currentValue > 0) {
@@ -251,14 +285,18 @@ void mssLinearTime(FILE * outputFile, int inputArray[512], int inputCount) {
             bestStartIndexSoFar = bestStartIndexHere;
 		}
     }
-
+	clock_t end = clock();
 	fprintf(outputFile, "\nALGORITHM 4: MSS LINEAR TIME\n");
 	fprintf(outputFile, "Max Sum: %i\n", maxSoFar);
-	fprintf(outputFile, "Output Array: \n");	
-	for (i = bestStartIndexSoFar; i <= bestEndIndexSoFar; i++) {
-		fprintf(outputFile, "%i ", inputArray[i]);
+	if (!testing) {
+		fprintf(outputFile, "\nINPUT ARRAY:\n");
+		writeArray(outputFile, inputArray, inputCount);
+		fprintf(outputFile, "Output Array: \n");	
+		for (i = bestStartIndexSoFar; i <= bestEndIndexSoFar; i++) {
+			fprintf(outputFile, "%i ", inputArray[i]);
+		}
 	}
-	fprintf(outputFile, "\n");
+	fprintf(outputFile, "Running Time: %lf\n", (double)(end - begin)/ CLOCKS_PER_SEC);
 }
 
 int main() {
@@ -271,6 +309,8 @@ int main() {
 	char c,							// individual read character from file
          stringArray[512],			// individual array from file as string
          stringValue[512];			// individual value from array as string
+	time_t t;
+	srand((unsigned) time(&t));
 
 	// files used for reading and writing
 	inputFile = fopen("MSS_Problems.txt", "r");
@@ -281,6 +321,7 @@ int main() {
      * process the arrays through each MSS algorithm. This process also removes
      * unnecessary values such as square brackets, new lines, and white space
     */
+/*
 	while ((c = getc(inputFile)) != EOF) {
 		// identifies end of individual array
 		if (c == ']') {
@@ -305,9 +346,7 @@ int main() {
 
 			// output formatting for ease of reading
 			fprintf(outputFile, "\n----------------------------------------------------\n");
-			fprintf(outputFile, "\nINPUT ARRAY:\n");
-			writeArray(outputFile, inputArray, inputCount);
-
+			
 			// process input array through each of the four algorithms
 			mssEnumeration(outputFile, inputArray, inputCount);
 			mssBetterEnumeration(outputFile, inputArray, inputCount);
@@ -326,8 +365,33 @@ int main() {
 	}
 
 
+	*/
+	inputCount = 1750000;
+	int testArray[inputCount],
+   	    randInt = 0,
+       	signCheck = 0,
+		j = 0;
+
+	fprintf(outputFile, "\nInput Size: %i\n", inputCount);
+	for (i = 0; i < 10; i++) {
+		for (j = 0; j < inputCount; j++) {
+			randInt = rand() % 100;
+			signCheck = rand();
+			if (signCheck % 2 == 0) {
+				randInt = randInt * -1;
+			}
+			testArray[j] = randInt;
+		}
+		
+		fprintf(outputFile, "Test Instance: %i\n", i + 1);
+		// process input array through each of the four algorithms
+		//mssEnumeration(outputFile, testArray, inputCount);
+		//mssBetterEnumeration(outputFile, testArray, inputCount);
+		mssDivideAndConquer(outputFile, testArray, inputCount);
+		//mssLinearTime(outputFile, testArray, inputCount);
+	}
 	fclose(inputFile);
 	fclose(outputFile);
-
+	
 	return 0;
 }
