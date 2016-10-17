@@ -366,7 +366,7 @@ int main() {
 
 
 	*/
-	inputCount = 1750000;
+	inputCount = 1975000;
 	int testArray[inputCount],
    	    randInt = 0,
        	signCheck = 0,
@@ -383,12 +383,11 @@ int main() {
 			testArray[j] = randInt;
 		}
 		
-		fprintf(outputFile, "Test Instance: %i\n", i + 1);
 		// process input array through each of the four algorithms
 		//mssEnumeration(outputFile, testArray, inputCount);
 		//mssBetterEnumeration(outputFile, testArray, inputCount);
-		mssDivideAndConquer(outputFile, testArray, inputCount);
-		//mssLinearTime(outputFile, testArray, inputCount);
+		//mssDivideAndConquer(outputFile, testArray, inputCount);
+		mssLinearTime(outputFile, testArray, inputCount);
 	}
 	fclose(inputFile);
 	fclose(outputFile);
