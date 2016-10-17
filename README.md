@@ -27,4 +27,8 @@
   which can be reviewed for the results.
   
 ##Modifications
-  In order to change the input file for input arrays to be tested, simply 
+  In order to change the input file for input arrays to be tested, simply add a file to the
+  same directory and modify fopen call on line 343. The line opens a file for reading to
+  calculate array values. Simply change the file name to the file of your choosing, then
+  re-compile and run the program again for new results. Note that this will overwrite the
+  results file and results from the previous test will be lost.
