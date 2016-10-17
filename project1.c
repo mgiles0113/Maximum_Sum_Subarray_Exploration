@@ -35,6 +35,11 @@
  *     elements learned from the following two web sites to create the function
  *       - https://en.wikipedia.org/wiki/Maximum_subarray_problem
  *       - http://stackoverflow.com/questions/7943903/maximum-subarray-of-an-array-with-integers
+ *   Divide and Conquer -
+ *     In addition to pseudocode from "Introduction to Algorithms" by Cormen,
+ *     Leiserson, Clifford, and Stein, I used the code on this post to serve
+ *     as the platform for the Divide and Conquer algorithm:
+ *       - http://www.geeksforgeeks.org/divide-and-conquer-maximum-sum-subarray
  *****************************************************************************/
 
 #include <stdio.h>
@@ -64,15 +69,6 @@ void writeArray(FILE * outputFile, int array[512], int arrayCount) {
         fprintf(outputFile, "%i ", array[i]);
     }
     fprintf(outputFile, "\n");
-}
-
-
-int max2(int a, int b) {
-	return (a > b)? a : b;
-}
-
-int max3(int a, int b, int c) {
-	return max2(max2(a, b), c);
 }
 
 /******************************************************************************
@@ -136,8 +132,17 @@ void mssEnumeration(FILE * outputFile, int inputArray[512], int inputCount) {
 
 /******************************************************************************
  * Function Name: mssBetterEnumeration
- * Parameters:
- *
+ * Description: This function calculates the maximum subarray using 
+ * enumeration. One number is added to the sum for every instance.
+ * Input:
+ * 	 - outputFile: file to write the results of the function
+ * 	 - inputArray: array of integers to be used to calculate maximum sum and
+ * 	     indices for the maximum subarray.
+ * 	 - inputCount: number of actual values in array for ease of iteration.
+ * Output:
+ *   All output is directed to the output file specified. The content is the
+ *   value of the maximum sum as well as the array contents of the input
+ *   array's maximum sum subarray.
  *****************************************************************************/
 void mssBetterEnumeration(FILE * outputFile,
                           int inputArray[512],
@@ -168,43 +173,50 @@ void mssBetterEnumeration(FILE * outputFile,
 
 /******************************************************************************
  * Function Name: mssDivideAndConquer
- * Parameters:
- *
+ * Description: Finds maximum sum of subarray using divide and conquer. It
+ *   does this by dividing the array in half and looking for the maximum 
+ *   subarray in the left subarray and the right subarray. If the maximum
+ *   subarray contains the middle element then the maximum subarray is the
+ *   maximum suffic subarray of the left plus the maximum prefix subarray of
+ *   the right. This middle maximum is compared with both the maximum of the
+ *   left and the right and the highest value is the maximum subarray.
+ * Input:
+ *   - outputFile: file to write the results of the function.
+ *   - inputArray: array of integers to be used to calculate maximum sum and
+ *       indices for the maximum subarray.
+ *   - inputCount: number of actualy values in array for ease of iteration.
+ * Output:
+ *   All output is directed to the output file specified. The content is the
+ *   value of the maximum sum as well as the array contents of the input
+ *   array's maximum sum subarray.
  *****************************************************************************/
-int dacStartIndex = 0,
-	dacEndIndex = 0,
-	dacLargestSum = 0,
-	dacCrossingLeft = 0,
-	dacCrossingRight = 0;
 void mssDivideAndConquer(FILE * outputFile,
                          int inputArray[512],
                          int inputCount) {
 	//int maxSum = -1,
-	int	i = 0,
+	int maxSubStartIndex = 0,
+		maxSubEndIndex = inputCount - 1,
+		maxSubLargestSum = -1,
+		i = 0,
 		maxSum = 0;
-	dacStartIndex = 0;
-	dacEndIndex = inputCount - 1;
-	dacLargestSum = -1000;
-	maxSum = maxSubArraySum(inputArray, 0, inputCount - 1);
+	maxSum = maxSubArraySum(inputArray, 0, inputCount - 1, &maxSubStartIndex, &maxSubEndIndex, &maxSubLargestSum);
 
 	fprintf(outputFile, "\nALGORITHM 3: MSS DIVIDE AND CONQUER\n");
 	fprintf(outputFile, "Max Sum: %i\n", maxSum);
 	fprintf(outputFile, "Output Array: \n");
-	for (i = dacStartIndex; i <= dacEndIndex; i++) {
+	for (i = maxSubStartIndex; i <= maxSubEndIndex; i++) {
 		fprintf(outputFile, "%i ", inputArray[i]);
 	}
 }
 
-int maxCrossingSum(int arr[], int l, int m, int h) {
+int maxCrossingSum(int arr[], int l, int m, int h, int *maxSubCrossingLeft, int * maxSubCrossingRight) {
 	int sum = 0;
 	int left_sum = INT_MIN;
 	int i = 0;
-	dacCrossingLeft = m;
-	dacCrossingRight = m;
 	for (i = m; i >= l; i--) {
 		sum = sum + arr[i];
 		if (sum > left_sum) {
-			dacCrossingLeft = i;
+			*maxSubCrossingLeft = i;
 			left_sum = sum;
 		}
 	}
@@ -214,7 +226,7 @@ int maxCrossingSum(int arr[], int l, int m, int h) {
 	for (i = m + 1; i <= h; i++) {
 		sum = sum + arr[i];
 		if (sum > right_sum) {
-			dacCrossingRight = i;
+			*maxSubCrossingRight = i;
 			right_sum = sum;
 		}
 	}
@@ -222,38 +234,40 @@ int maxCrossingSum(int arr[], int l, int m, int h) {
 	return left_sum + right_sum;
 }
 
-int maxSubArraySum(int arr[], int l, int h) {
+int maxSubArraySum(int arr[], int l, int h, int *maxSubStartIndex, int * maxSubEndIndex, int *maxSubLargestSum) {
 	
 	if (l == h) {
 		return arr[l];
 	}
-	int m = (l + h)/2;
-	int maxLeft = 0,
+	int m = (l + h)/2,
+		maxLeft = 0,
 		maxRight = 0,
-		maxCrossing = 0;
-	maxLeft = maxSubArraySum(arr, l, m);
-	maxRight = maxSubArraySum(arr, m + 1, h);
-	maxCrossing = maxCrossingSum(arr, l, m, h);
+		maxCrossing = 0,
+		maxSubCrossingLeft = m,
+		maxSubCrossingRight = m;
+	maxLeft = maxSubArraySum(arr, l, m, maxSubStartIndex, maxSubEndIndex, maxSubLargestSum);
+	maxRight = maxSubArraySum(arr, m + 1, h, maxSubStartIndex, maxSubEndIndex, maxSubLargestSum);
+	maxCrossing = maxCrossingSum(arr, l, m, h, &maxSubCrossingLeft, &maxSubCrossingRight);
 
 	if (maxLeft > maxRight && maxLeft > maxCrossing) {
-		if (maxLeft > dacLargestSum) {
-			dacLargestSum = maxLeft;
-			dacStartIndex = l;
-			dacEndIndex = m;
+		if (maxLeft > *maxSubLargestSum) {
+			*maxSubLargestSum = maxLeft;
+			*maxSubStartIndex = l;
+			*maxSubEndIndex = m;
 		}
 		return maxLeft;
 	} else if (maxRight > maxLeft && maxRight > maxCrossing) {
-		if (maxRight > dacLargestSum) {
-			dacLargestSum = maxRight;
-			dacStartIndex = m + 1;
-			dacEndIndex = h;
+		if (maxRight > *maxSubLargestSum) {
+			*maxSubLargestSum = maxRight;
+			*maxSubStartIndex = m + 1;
+			*maxSubEndIndex = h;
 		}
 		return maxRight;
 	} else {
-		if (maxCrossing > dacLargestSum) {
-			dacLargestSum = maxCrossing;
-			dacStartIndex = dacCrossingLeft;
-			dacEndIndex = dacCrossingRight;
+		if (maxCrossing > *maxSubLargestSum) {
+			*maxSubLargestSum = maxCrossing;
+			*maxSubStartIndex = maxSubCrossingLeft;
+			*maxSubEndIndex = maxSubCrossingRight;
 		}
 		return maxCrossing;
 	}
@@ -261,7 +275,20 @@ int maxSubArraySum(int arr[], int l, int h) {
 
 /******************************************************************************
  * Function Name: mssLinearTime
- * Parameters:
+ * Description: This function takes an array of positive and negative integers
+ *   and calculated the maximum sum of the a subarray of the array. It then
+ *   writes the results to a specified output file. This function represents
+ *   a dynamic programming approach by taking advantage of previously
+ *   calculated subproblems.
+ * Input:
+ *   - outputFile - file to write the results of the function
+ *   - inputArray: array of integers to be used to calculate maximum sum and
+ *       indices for the maximum subarray.
+ *   - inputCount: number of actual values in array for ease of iteration.
+ * Output:
+ *   All output is directed to the output file specified. The content is the
+ *   value of the maximum sum as well as the array contents of the input
+ *   array's maximum sum subarray.
  *
  *****************************************************************************/
 void mssLinearTime(FILE * outputFile, int inputArray[512], int inputCount) {
